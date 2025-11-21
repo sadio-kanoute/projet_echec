@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 
 // On importe tes modèles (Attention aux chemins ../ !)
 // Si tes modèles sont à la racine, il faut remonter de 3 niveaux : api > products > app > racine
-import Product from "@api/products/app/models/Product";
-import Universe from "@api/products/app/models/Universe";
-import Category from "@api/products/app/models/Category";
+import Product from "../../../models/Product.js";
+import Universe from "../../../models/Universe.js";
+import Category from "../../../models/Category.js";
 
 // Fonction pour se connecter (Si pas déjà connecté)
 const connectDB = async () => {
