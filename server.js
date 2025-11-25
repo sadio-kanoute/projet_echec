@@ -1,4 +1,6 @@
 import express from "express";
+import fs from "fs";
+import path from "path";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -8,8 +10,25 @@ import errorHandler from "./middleware/errorHandler.js";
 import productRoutes from "./routes/products.js";
 import universeRoutes from "./routes/universes.js";
 import categoryRoutes from "./routes/categories.js";
+// ADDED: auth routes
+import authRoutes from "./routes/auth.js";
+const code = config.json
 
+// Charger .env via dotenv si présent
 dotenv.config();
+
+// Fallback : lire config.json si certaines variables manquent
+try {
+  const cfgPath = path.resolve(process.cwd(), "config.json");
+  if (fs.existsSync(cfgPath)) {
+    const cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+    for (const key of Object.keys(cfg)) {
+      if (!process.env[key]) process.env[key] = cfg[key];
+    }
+  }
+} catch (err) {
+  console.error("Impossible de charger config.json :", err.message);
+}
 
 const app = express();
 
@@ -20,7 +39,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // CONNEXION MONGODB
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(code.MONGODB_URI,{useNewUrlParser:true,useUnifiedTopology:true})
   .then(() => console.log("✅ MongoDB connecté"))
   .catch((err) => console.error("❌ Erreur MongoDB:", err));
 
@@ -62,6 +81,8 @@ app.get("/", (req, res) => {
 app.use("/api/products", productRoutes);
 app.use("/api/universes", universeRoutes);
 app.use("/api/categories", categoryRoutes);
+// ADDED: auth
+app.use("/api/auth", authRoutes);
 
 // MIDDLEWARE DE GESTION D'ERREURS (doit être en dernier)
 app.use(errorHandler);

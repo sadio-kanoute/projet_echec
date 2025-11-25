@@ -7,6 +7,8 @@ import {
   deleteProduct,
   getFeaturedProducts,
 } from "../controllers/productController.js";
+// ADDED
+import { protect, authorize } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -15,9 +17,9 @@ router.get("/", getAllProducts);
 router.get("/featured", getFeaturedProducts);
 router.get("/:id", getProductById);
 
-// Routes admin (à protéger plus tard)
-router.post("/", createProduct);
-router.put("/:id", updateProduct);
-router.delete("/:id", deleteProduct);
+// Routes admin (protégées)
+router.post("/", protect, authorize("admin"), createProduct);
+router.put("/:id", protect, authorize("admin"), updateProduct);
+router.delete("/:id", protect, authorize("admin"), deleteProduct);
 
 export default router;
