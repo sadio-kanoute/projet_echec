@@ -12,22 +12,22 @@ import universeRoutes from "./routes/universes.js";
 import categoryRoutes from "./routes/categories.js";
 // ADDED: auth routes
 import authRoutes from "./routes/auth.js";
-const code = config.json
+//import code  from"./config.json";
 
 // Charger .env via dotenv si présent
 dotenv.config();
 
-// Fallback : lire config.json si certaines variables manquent
-try {
-  const cfgPath = path.resolve(process.cwd(), "config.json");
-  if (fs.existsSync(cfgPath)) {
-    const cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
-    for (const key of Object.keys(cfg)) {
-      if (!process.env[key]) process.env[key] = cfg[key];
+// fallback : charger config.json si présent (sans import assertion)
+const cfgPath = path.resolve(process.cwd(), "config.json");
+if (fs.existsSync(cfgPath)) {
+  try {
+    const fileCfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+    for (const k of Object.keys(fileCfg)) {
+      if (!process.env[k]) process.env[k] = fileCfg[k];
     }
+  } catch (err) {
+    console.error("Impossible de parser config.json :", err.message);
   }
-} catch (err) {
-  console.error("Impossible de charger config.json :", err.message);
 }
 
 const app = express();
@@ -39,7 +39,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // CONNEXION MONGODB
 mongoose
-  .connect(code.MONGODB_URI,{useNewUrlParser:true,useUnifiedTopology:true})
+  .connect("mongodb+srv://nordineaitdb_user:nrz92290!@cluster0.qyuo0wh.mongodb.net/?appName=Cluster0")
   .then(() => console.log("✅ MongoDB connecté"))
   .catch((err) => console.error("❌ Erreur MongoDB:", err));
 
@@ -95,7 +95,8 @@ app.use("*", (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const PORT = parseInt(process.env.PORT, 10) || 3000;
+// écoute sur PORT (optionnel : préciser 'localhost' en second argument)
+app.listen(PORT, "localhost", () => {
   console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
 });
