@@ -38,14 +38,14 @@ export const login = async (req, res, next) => {
     const { telephone, password } = req.body;
     if (!telephone || !password) return res.status(400).json({ success: false, message: "Champs manquants" });
 
-    // récupérer user avec mot de passe pour vérification
-    const user = await User.findOne({ telephone: "0600000000" }).select("+password");
+    // IMPORTANT : sélectionner explicitement le password si le schéma met select:false
+    const user = await User.findOne({ telephone }).select("+password");
     if (!user) return res.status(401).json({ success: false, message: "Identifiants invalides" });
 
     const isMatch = await user.matchPassword(password);
     if (!isMatch) return res.status(401).json({ success: false, message: "Identifiants invalides" });
 
-    // optionnel : retirer password avant réponse
+    // retirer password avant réponse
     user.password = undefined;
 
     const token = generateToken(user);

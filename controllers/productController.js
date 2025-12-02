@@ -77,7 +77,23 @@ export const getProductById = async (req, res, next) => {
 // @access  Private (pour l'instant public pour les tests)
 export const createProduct = async (req, res, next) => {
   try {
-    const product = await Product.create(req.body);
+    const { name, price, category, universe, image } = req.body;
+    const errors = [];
+
+    if (!name) errors.push("Le nom est obligatoire");
+    if (price === undefined) errors.push("Le prix est obligatoire");
+    else {
+      const parsedPrice = Number(price);
+      if (Number.isNaN(parsedPrice) || parsedPrice < 0) errors.push("Le prix doit être un nombre positif");
+    }
+    if (!category) errors.push("La catégorie est obligatoire");
+    if (!universe) errors.push("L'univers est obligatoire");
+    if (!image) errors.push("L'image est obligatoire");
+
+    if (errors.length) return res.status(400).json({ success: false, message: "Erreur de validation", errors });
+
+    const productData = { ...req.body, price: Number(price) };
+    const product = await Product.create(productData);
 
     res.status(201).json({
       success: true,
